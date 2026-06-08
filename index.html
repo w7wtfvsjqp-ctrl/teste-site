@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PortaMaster</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--dark:#2a2a28;--yellow:#ffef2c;--yellow2:#e6d600;}
+html{scroll-behavior:smooth;}
+body{background:var(--dark);color:#fff;font-family:'Segoe UI',system-ui,sans-serif;overflow-x:hidden;}
+
+nav{position:fixed;top:0;left:0;width:100%;z-index:200;padding:1.1rem 4rem;display:flex;justify-content:space-between;align-items:center;transition:background .4s;}
+nav.scrolled{background:rgba(42,42,40,.94);backdrop-filter:blur(14px);}
+.logo{font-size:1.2rem;font-weight:800;color:#fff;letter-spacing:.04em;}
+.logo span{color:var(--yellow);}
+.nav-links{display:flex;gap:2rem;list-style:none;}
+.nav-links a{color:rgba(255,255,255,.6);text-decoration:none;font-size:.88rem;transition:color .2s;}
+.nav-links a:hover{color:var(--yellow);}
+.nav-cta{background:var(--yellow);color:var(--dark);padding:.5rem 1.3rem;border-radius:50px;font-weight:700;font-size:.88rem;text-decoration:none;}
+
+/* HERO SEQUENCE */
+#hero-sequence{height:500vh;position:relative;}
+#hero-sticky{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+canvas#door{position:absolute;inset:0;width:100%;height:100%;}
+
+.hero-text{position:absolute;z-index:10;text-align:center;pointer-events:none;transition:opacity .5s,transform .5s;max-width:600px;padding:0 2rem;}
+.hero-tag{display:inline-block;background:rgba(255,239,44,.12);border:1px solid rgba(255,239,44,.28);color:var(--yellow);font-size:.74rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:.35rem .9rem;border-radius:50px;margin-bottom:1.1rem;}
+.hero-title{font-size:clamp(2rem,5vw,4.5rem);font-weight:800;line-height:1.07;letter-spacing:-.025em;margin-bottom:.9rem;}
+.hero-title span{color:var(--yellow);}
+.hero-sub{font-size:.98rem;color:rgba(255,255,255,.52);line-height:1.65;max-width:460px;margin:0 auto 2rem;}
+.hero-btns{display:flex;gap:.9rem;justify-content:center;pointer-events:all;}
+.btn-p{background:var(--yellow);color:var(--dark);padding:.78rem 1.9rem;border-radius:50px;font-weight:700;font-size:.92rem;text-decoration:none;}
+.btn-o{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.28);padding:.78rem 1.9rem;border-radius:50px;font-size:.92rem;text-decoration:none;}
+
+.scroll-hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.4rem;color:rgba(255,255,255,.3);font-size:.68rem;letter-spacing:.1em;transition:opacity .4s;}
+.scroll-hint svg{animation:bob 2s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(5px);}}
+
+/* STATS */
+.stats-bar{background:var(--yellow);color:var(--dark);padding:2.5rem 4rem;display:grid;grid-template-columns:repeat(4,1fr);text-align:center;}
+.stat-n{font-size:2.2rem;font-weight:800;}
+.stat-l{font-size:.8rem;font-weight:600;opacity:.6;margin-top:.2rem;}
+
+/* SECTIONS */
+section{padding:7rem 4rem;}
+.sec-tag{display:inline-block;color:var(--yellow);font-size:.74rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:.8rem;}
+.sec-title{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:800;line-height:1.1;margin-bottom:1rem;}
+.sec-sub{font-size:.98rem;color:rgba(255,255,255,.5);line-height:1.7;max-width:500px;}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s,transform .7s;}
+.reveal.visible{opacity:1;transform:none;}
+
+/* SOBRE */
+#sobre{background:#222220;}
+.sobre-inner{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;max-width:1100px;margin:0 auto;}
+.sobre-cards{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;}
+.sobre-card{background:rgba(255,239,44,.07);border:1px solid rgba(255,239,44,.1);border-radius:14px;padding:1.4rem;text-align:center;}
+.sobre-card .n{font-size:1.7rem;font-weight:800;color:var(--yellow);}
+.sobre-card .l{font-size:.78rem;color:rgba(255,255,255,.45);margin-top:.2rem;}
+.check-list{list-style:none;margin-top:1.8rem;display:flex;flex-direction:column;gap:.75rem;}
+.check-list li{display:flex;gap:.7rem;align-items:flex-start;font-size:.92rem;color:rgba(255,255,255,.7);}
+.check-list li::before{content:"✦";color:var(--yellow);font-size:.62rem;margin-top:.25rem;flex-shrink:0;}
+
+/* SERVIÇOS */
+#servicos{background:var(--dark);}
+.srv-header{max-width:1100px;margin:0 auto 3rem;}
+.srv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;max-width:1100px;margin:0 auto;}
+.srv-card{background:#222220;border-radius:18px;padding:2.2rem 1.8rem;border:1px solid rgba(255,255,255,.05);transition:transform .3s,border-color .3s;}
+.srv-card:hover{transform:translateY(-6px);border-color:rgba(255,239,44,.2);}
+.srv-icon{width:52px;height:52px;background:rgba(255,239,44,.1);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1.3rem;}
+.srv-card h3{font-size:1.15rem;font-weight:700;margin-bottom:.6rem;}
+.srv-card p{font-size:.88rem;color:rgba(255,255,255,.48);line-height:1.7;}
+.srv-badge{display:inline-block;margin-top:1rem;font-size:.72rem;font-weight:700;color:var(--yellow);letter-spacing:.08em;text-transform:uppercase;}
+
+/* POR QUÊ */
+#porque{background:#1c1c1a;}
+.porque-inner{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;max-width:1100px;margin:0 auto;}
+.feat-list{display:flex;flex-direction:column;gap:1.2rem;margin-top:2rem;}
+.feat-item{display:flex;gap:1rem;align-items:flex-start;padding:1.2rem;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);transition:background .3s,border-color .3s;}
+.feat-item:hover{background:rgba(255,239,44,.05);border-color:rgba(255,239,44,.13);}
+.feat-dot{width:40px;height:40px;border-radius:50%;background:rgba(255,239,44,.1);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.feat-item h4{font-size:.95rem;font-weight:700;margin-bottom:.25rem;}
+.feat-item p{font-size:.85rem;color:rgba(255,255,255,.48);line-height:1.6;}
+.porque-visual{background:#222220;border-radius:20px;padding:2.5rem;display:flex;flex-direction:column;gap:1rem;}
+.rating-box{text-align:center;padding:1.8rem;border-radius:14px;background:rgba(255,239,44,.06);border:1px solid rgba(255,239,44,.1);}
+.stars{font-size:1.3rem;color:var(--yellow);}
+.rating-n{font-size:2.8rem;font-weight:800;color:var(--yellow);line-height:1;}
+.rating-l{font-size:.82rem;color:rgba(255,255,255,.45);margin-top:.3rem;}
+.mini-cards{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;}
+.mini-card{background:rgba(255,255,255,.04);border-radius:10px;padding:1.1rem;text-align:center;}
+.mini-card .mn{font-size:1.4rem;font-weight:800;color:var(--yellow);}
+.mini-card .ml{font-size:.75rem;color:rgba(255,255,255,.4);margin-top:.2rem;}
+
+/* CONTATO */
+#contato{background:var(--dark);}
+.contato-inner{max-width:820px;margin:0 auto;text-align:center;}
+.contato-inner .sec-sub{margin:0 auto 2.5rem;}
+.contact-box{background:#222220;border-radius:22px;padding:2.5rem;text-align:left;margin-top:1rem;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:.9rem;}
+.form-group{display:flex;flex-direction:column;gap:.35rem;}
+.form-group label{font-size:.74rem;color:rgba(255,255,255,.45);font-weight:600;letter-spacing:.07em;text-transform:uppercase;}
+.form-group input,.form-group select,.form-group textarea{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);color:#fff;padding:.8rem .95rem;border-radius:9px;font-size:.92rem;outline:none;transition:border .2s;font-family:inherit;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:rgba(255,239,44,.45);}
+.form-group select option{background:#2a2a28;}
+.form-full{grid-column:1/-1;}
+textarea{resize:none;}
+.form-submit{width:100%;background:var(--yellow);color:var(--dark);border:none;padding:.95rem;border-radius:50px;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:.9rem;transition:background .2s;}
+.form-submit:hover{background:var(--yellow2);}
+.divider{display:flex;align-items:center;gap:1rem;margin:1.3rem 0;color:rgba(255,255,255,.2);font-size:.82rem;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08);}
+.whats-btn{display:inline-flex;align-items:center;gap:.6rem;background:#25d366;color:#fff;padding:.8rem 1.8rem;border-radius:50px;font-weight:700;text-decoration:none;font-size:.92rem;transition:background .2s;}
+.whats-btn:hover{background:#1ebe5c;}
+
+footer{background:#181816;padding:2.2rem 4rem;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,.05);}
+footer p{font-size:.8rem;color:rgba(255,255,255,.25);}
+
+@media(max-width:768px){
+  nav{padding:1rem 1.5rem;}
+  .nav-links{display:none;}
+  section{padding:4.5rem 1.5rem;}
+  .stats-bar{grid-template-columns:1fr 1fr;padding:2rem 1.5rem;}
+  .sobre-inner,.porque-inner{grid-template-columns:1fr;}
+  .srv-grid{grid-template-columns:1fr;}
+  .form-grid{grid-template-columns:1fr;}
+  footer{flex-direction:column;gap:.8rem;text-align:center;padding:2rem 1.5rem;}
+}
+</style>
+</head>
+<body>
+
+<nav id="navbar">
+  <div class="logo">Porta<span>Master</span></div>
+  <ul class="nav-links">
+    <li><a href="#sobre">Sobre</a></li>
+    <li><a href="#servicos">Serviços</a></li>
+    <li><a href="#porque">Diferenciais</a></li>
+    <li><a href="#contato">Contato</a></li>
+  </ul>
+  <a href="#contato" class="nav-cta">Orçamento</a>
+</nav>
+
+<div id="hero-sequence">
+  <div id="hero-sticky">
+    <canvas id="door"></canvas>
+
+    <div class="hero-text" id="t0">
+      <div class="hero-tag">Portas de Alto Padrão</div>
+      <h1 class="hero-title">Segurança e design<br>que <span>impressionam</span></h1>
+      <p class="hero-sub">Portas de enrolar automáticas e seccionais com tecnologia de ponta para residências, comércios e indústrias.</p>
+      <div class="hero-btns">
+        <a href="#contato" class="btn-p">Solicitar Orçamento</a>
+        <a href="#servicos" class="btn-o">Ver Produtos</a>
+      </div>
+    </div>
+
+    <div class="hero-text" id="t1" style="opacity:0;transform:translateY(18px)">
+      <div class="hero-tag">Automação Inteligente</div>
+      <h1 class="hero-title">A porta se abre<br><span>para você</span></h1>
+      <p class="hero-sub">Sensor de presença, controle remoto e motor silencioso. Conforto real no dia a dia.</p>
+    </div>
+
+    <div class="hero-text" id="t2" style="opacity:0;transform:translateY(18px)">
+      <div class="hero-tag">Bem-vindo</div>
+      <h1 class="hero-title">Entre com<br><span>confiança</span></h1>
+      <p class="hero-sub">Instalação profissional, garantia estendida e suporte técnico 24 horas.</p>
+      <div class="hero-btns">
+        <a href="#servicos" class="btn-p">Conheça os Produtos</a>
+      </div>
+    </div>
+
+    <div class="scroll-hint" id="hint">
+      <span>ROLE PARA BAIXO</span>
+      <svg width="14" height="18" viewBox="0 0 14 18" fill="none"><rect x="5.5" y="2" width="3" height="4" rx="1.5" fill="white"/><rect x=".5" y=".5" width="13" height="17" rx="6.5" stroke="white" stroke-opacity=".3"/></svg>
+    </div>
+  </div>
+</div>
+
+<div class="stats-bar reveal">
+  <div><div class="stat-n">+800</div><div class="stat-l">Portas Instaladas</div></div>
+  <div><div class="stat-n">15+</div><div class="stat-l">Anos de Experiência</div></div>
+  <div><div class="stat-n">100%</div><div class="stat-l">Garantia no Serviço</div></div>
+  <div><div class="stat-n">24h</div><div class="stat-l">Suporte Técnico</div></div>
+</div>
+
+<section id="sobre">
+  <div class="sobre-inner">
+    <div class="reveal">
+      <span class="sec-tag">Quem somos</span>
+      <h2 class="sec-title">Referência em portas automáticas</h2>
+      <p class="sec-sub">Trabalhamos com as melhores marcas do mercado, entregando soluções de alto padrão com excelência técnica e acabamento impecável.</p>
+      <ul class="check-list">
+        <li>Equipe técnica certificada e especializada</li>
+        <li>Produtos com garantia estendida de fábrica</li>
+        <li>Atendimento personalizado do projeto à instalação</li>
+        <li>Manutenção preventiva e corretiva</li>
+        <li>Parceria com arquitetos e construtoras</li>
+      </ul>
+    </div>
+    <div class="sobre-cards reveal">
+      <div class="sobre-card"><div class="n">SC</div><div class="l">Santa Catarina</div></div>
+      <div class="sobre-card"><div class="n" style="color:#fff">ISO</div><div class="l">Certificado</div></div>
+      <div class="sobre-card"><div class="n">48h</div><div class="l">Instalação Rápida</div></div>
+      <div class="sobre-card"><div class="n">5★</div><div class="l">Avaliação Média</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="servicos">
+  <div class="srv-header reveal">
+    <span class="sec-tag">Nossos Produtos</span>
+    <h2 class="sec-title">Soluções para cada necessidade</h2>
+  </div>
+  <div class="srv-grid">
+    <div class="srv-card reveal">
+      <div class="srv-icon">🔄</div>
+      <h3>Portas de Enrolar Automáticas</h3>
+      <p>Motor silencioso, controle remoto e sensor de obstáculos. Ideais para garagens, comércios e galpões. Alta durabilidade em aço galvanizado.</p>
+      <span class="srv-badge">→ Automação Completa</span>
+    </div>
+    <div class="srv-card reveal">
+      <div class="srv-icon">🏗️</div>
+      <h3>Portas Seccionais</h3>
+      <p>Painéis horizontais articulados que maximizam o espaço. Isolamento térmico e acústico superior. Acabamento premium.</p>
+      <span class="srv-badge">→ Máximo Isolamento</span>
+    </div>
+    <div class="srv-card reveal">
+      <div class="srv-icon">⭐</div>
+      <h3>Alto Padrão Personalizado</h3>
+      <p>Projetos exclusivos em alumínio anodizado, madeira nobre e vidro temperado. Para residências de luxo e empreendimentos premium.</p>
+      <span class="srv-badge">→ Projeto Exclusivo</span>
+    </div>
+  </div>
+</section>
+
+<section id="porque">
+  <div class="porque-inner">
+    <div>
+      <span class="sec-tag">Por que nos escolher</span>
+      <h2 class="sec-title reveal">Qualidade que você vê e sente</h2>
+      <div class="feat-list">
+        <div class="feat-item reveal"><div class="feat-dot">🛡</div><div><h4>Garantia Real</h4><p>2 anos em peças e mão de obra. Não deixamos nossos clientes na mão.</p></div></div>
+        <div class="feat-item reveal"><div class="feat-dot">⚡</div><div><h4>Instalação Ágil</h4><p>Equipe treinada que cumpre prazos com instalação limpa e sem transtornos.</p></div></div>
+        <div class="feat-item reveal"><div class="feat-dot">🔧</div><div><h4>Suporte 24/7</h4><p>Atendimento de emergência disponível. Sua segurança não pode esperar.</p></div></div>
+        <div class="feat-item reveal"><div class="feat-dot">💎</div><div><h4>Materiais Premium</h4><p>Apenas fornecedores certificados e materiais de primeira linha.</p></div></div>
+      </div>
+    </div>
+    <div class="porque-visual reveal">
+      <div class="rating-box">
+        <div class="stars">★★★★★</div>
+        <div class="rating-n">4.9</div>
+        <div class="rating-l">Baseado em +200 avaliações</div>
+      </div>
+      <div class="mini-cards">
+        <div class="mini-card"><div class="mn">+800</div><div class="ml">Projetos entregues</div></div>
+        <div class="mini-card"><div class="mn">15+</div><div class="ml">Anos de mercado</div></div>
+        <div class="mini-card"><div class="mn">48h</div><div class="ml">Prazo de instalação</div></div>
+        <div class="mini-card"><div class="mn">100%</div><div class="ml">Satisfação garantida</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contato">
+  <div class="contato-inner">
+    <span class="sec-tag reveal">Fale conosco</span>
+    <h2 class="sec-title reveal">Orçamento sem compromisso</h2>
+    <p class="sec-sub reveal">Respondemos em até 2 horas úteis com uma proposta personalizada para o seu projeto.</p>
+    <div class="contact-box reveal">
+      <div class="form-grid">
+        <div class="form-group"><label>Nome completo</label><input type="text" placeholder="Seu nome"></div>
+        <div class="form-group"><label>Telefone / WhatsApp</label><input type="tel" placeholder="(47) 99999-9999"></div>
+        <div class="form-group"><label>E-mail</label><input type="email" placeholder="seu@email.com"></div>
+        <div class="form-group"><label>Produto</label>
+          <select>
+            <option value="">Selecione...</option>
+            <option>Porta de Enrolar Automática</option>
+            <option>Porta Seccional</option>
+            <option>Alto Padrão / Personalizado</option>
+            <option>Manutenção</option>
+          </select>
+        </div>
+        <div class="form-group form-full"><label>Mensagem</label><textarea rows="4" placeholder="Descreva seu projeto..."></textarea></div>
+      </div>
+      <button class="form-submit">Enviar Solicitação →</button>
+      <div class="divider">ou entre em contato direto</div>
+      <div style="text-align:center">
+        <a href="https://wa.me/5547999999999" class="whats-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.112 1.523 5.84L.057 23.7a.5.5 0 0 0 .611.611l5.88-1.479A11.943 11.943 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.803 9.803 0 0 1-5.032-1.388l-.36-.214-3.733.938.956-3.716-.235-.38A9.818 9.818 0 0 1 2.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
+          Chamar no WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="logo">Porta<span>Master</span></div>
+  <p>© 2025 PortaMaster · Navegantes, Santa Catarina</p>
+  <p>Todos os direitos reservados</p>
+</footer>
+
+<script>
+const canvas = document.getElementById('door');
+const ctx = canvas.getContext('2d');
+let lastP = 0;
+
+function setSize(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+setSize();
+window.addEventListener('resize', () => { setSize(); drawFrame(lastP); });
+
+// ── FRAME SEQUENCE ──
+const TOTAL_FRAMES = 407;
+const BASE_URL = 'https://raw.githubusercontent.com/w7wtfvsjqp-ctrl/Door-Animation/main/';
+const frames = [];
+let loadedCount = 0;
+let allLoaded = false;
+
+// loading overlay
+const overlay = document.createElement('div');
+overlay.style.cssText = 'position:fixed;inset:0;background:#2a2a28;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;';
+overlay.innerHTML = `
+  <div style="color:#ffef2c;font-size:.85rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;">Carregando animação</div>
+  <div style="width:220px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;">
+    <div id="prog-bar" style="height:100%;width:0%;background:#ffef2c;border-radius:2px;transition:width .15s;"></div>
+  </div>
+  <div id="prog-txt" style="color:rgba(255,255,255,.4);font-size:.78rem;">0 / ${TOTAL_FRAMES}</div>`;
+document.body.appendChild(overlay);
+
+for(let i = 1; i <= TOTAL_FRAMES; i++){
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  const num = String(i).padStart(4, '0');
+  img.src = BASE_URL + num + '.png';
+  img.onload = img.onerror = () => {
+    loadedCount++;
+    document.getElementById('prog-bar').style.width = (loadedCount / TOTAL_FRAMES * 100) + '%';
+    document.getElementById('prog-txt').textContent = `${loadedCount} / ${TOTAL_FRAMES}`;
+    if(loadedCount === TOTAL_FRAMES){
+      allLoaded = true;
+      overlay.style.transition = 'opacity .6s';
+      overlay.style.opacity = '0';
+      setTimeout(() => overlay.remove(), 700);
+      drawFrame(lastP);
+    }
+  };
+  frames[i - 1] = img;
+}
+
+function drawFrame(p){
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#2a2a28';
+  ctx.fillRect(0, 0, W, H);
+  if(!allLoaded) return;
+  const idx = Math.min(TOTAL_FRAMES - 1, Math.floor(p * (TOTAL_FRAMES - 1)));
+  const img = frames[idx];
+  if(!img || !img.complete || !img.naturalWidth) return;
+  const iR = img.naturalWidth / img.naturalHeight;
+  const cR = W / H;
+  let sw, sh, sx, sy;
+  if(iR > cR){ sh = H; sw = H * iR; sx = (W - sw) / 2; sy = 0; }
+  else { sw = W; sh = W / iR; sx = 0; sy = (H - sh) / 2; }
+  ctx.drawImage(img, sx, sy, sw, sh);
+}
+
+drawFrame(0);
+
+// ── SCROLL ──
+const seq = document.getElementById('hero-sequence');
+const t0 = document.getElementById('t0');
+const t1 = document.getElementById('t1');
+const t2 = document.getElementById('t2');
+const hint = document.getElementById('hint');
+
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function range(v,a,b){return clamp((v-a)/(b-a),0,1);}
+function fadeEl(el, o){
+  el.style.opacity = o;
+  el.style.transform = `translateY(${(1-o)*18}px)`;
+}
+
+function onScroll(){
+  const top = seq.getBoundingClientRect().top;
+  const scrollH = seq.offsetHeight - window.innerHeight;
+  const p = clamp(-top / scrollH, 0, 1);
+  lastP = p;
+  drawFrame(p);
+
+  fadeEl(t0, p < .22 ? 1 : 1 - range(p, .22, .34));
+  fadeEl(t1, range(p,.3,.44) * (1 - range(p,.56,.66)));
+  fadeEl(t2, range(p,.72,.86));
+
+  hint.style.opacity = 1 - range(p, 0, .1);
+
+  document.getElementById('navbar').classList.toggle('scrolled', -top > 60);
+}
+
+window.addEventListener('scroll', onScroll, {passive:true});
+onScroll();
+
+// ── REVEAL ──
+const obs = new IntersectionObserver(e => {
+  e.forEach(el => { if(el.isIntersecting) el.target.classList.add('visible'); });
+}, {threshold:.1});
+document.querySelectorAll('.reveal').forEach(r => obs.observe(r));
+</script>
+</body>
+</html>
